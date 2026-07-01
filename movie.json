@@ -1,0 +1,32 @@
+[
+  {
+    "movie-vector": [1.2, 3.4, 5.6],
+    "title": "Dead Man Walking",
+    "year": 1999,
+    "location-origin": {"lat": 34.0522, "lon": -118.2437}
+  },
+  {
+    "movie-vector": [2.1, 4.5, 6.7],
+    "title": "The Shawshank Redemption",
+    "year": 1994,
+    "location-origin": {"lat": 40.7128, "lon": -74.0060}
+  },
+  {
+    "movie-vector": [3.3, 1.8, 4.2],
+    "title": "Inception",
+    "year": 2010,
+    "location-origin": {"lat": 51.5074, "lon": -0.1278}
+  },
+  {
+    "movie-vector": [4.0, 2.9, 3.1],
+    "title": "Interstellar",
+    "year": 2014,
+    "location-origin": {"lat": 37.7749, "lon": -122.4194}
+  },
+  {
+    "movie-vector": [1.9, 5.2, 2.4],
+    "title": "The Dark Knight",
+    "year": 2008,
+    "location-origin": {"lat": 41.8781, "lon": -87.6298}
+  }
+]
