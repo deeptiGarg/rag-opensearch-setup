@@ -22,6 +22,7 @@ class OpenSearchServerlessClient:
             verify_certs=True,
             connection_class=RequestsHttpConnection,
             pool_maxsize=20,
+            timeout=60,
         )
 
     def create_index(self, index_body):
@@ -36,17 +37,49 @@ class OpenSearchServerlessClient:
         print(response)
         return response
 
-    def index_documents(self, file_path='movie.json'):
-        with open(file_path, 'r') as f:
-            movies = json.load(f)
+    def index_documents(self, text_field, file_path='movie.json'):
+        import time
 
-        for movie in movies:
+        with open(file_path, 'r') as f:
+            documents = json.load(f)
+
+        indexed_count = 0
+        skipped_count = 0
+
+        for doc in documents:
+            # Check if document already exists by text_field (keyword match)
+            try:
+                search_response = self.client.search(
+                    index=self.index_name,
+                    body={
+                        "query": {
+                            "term": {
+                                text_field: doc[text_field]
+                            }
+                        }
+                    }
+                )
+
+                if search_response['hits']['total']['value'] > 0:
+                    print(f'\nSkipped (already exists): {doc[text_field]}')
+                    skipped_count += 1
+                    continue
+            except Exception as e:
+                # If search fails (e.g. index just created), proceed with indexing
+                print(f'\nSearch check failed, proceeding to index: {e}')
+
             response = self.client.index(
                 index=self.index_name,
-                body=movie,
+                body=doc,
             )
-            print(f'\nIndexed: {movie["title"]}')
+            print(f'\nIndexed: {doc[text_field]}')
             print(response)
+            indexed_count += 1
+
+            # Brief pause to allow AOSS eventual consistency
+            time.sleep(1)
+
+        print(f'\nSummary: {indexed_count} indexed, {skipped_count} skipped')
 
     def retrieve_documents(self, query_vector, k=3):
         search_body = {
@@ -101,7 +134,7 @@ class OpenSearchServerlessClient:
 
 
 if __name__ == '__main__':
-    host = 'rt07p8k488npe50z4e3e.us-east-1.aoss-fips.amazonaws.com'
+    host = 'host-placeholder'
     region = 'us-east-1'
     index_name = 'movie-embedding-index'
 
@@ -135,7 +168,7 @@ if __name__ == '__main__':
     }
 
     # oss.create_index(index_body)
-    # oss.index_documents('movie.json')
+    # oss.index_documents('title','movie.json')
     oss.list_all_documents()
     oss.retrieve_documents([3.3, 1.8, 4.2])
     # oss.delete_index()
