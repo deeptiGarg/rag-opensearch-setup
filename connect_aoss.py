@@ -81,12 +81,12 @@ class OpenSearchServerlessClient:
 
         print(f'\nSummary: {indexed_count} indexed, {skipped_count} skipped')
 
-    def retrieve_documents(self, query_vector, k=3):
+    def retrieve_documents(self, query_vector, vector_field, k=3):
         search_body = {
             "size": k,
             "query": {
                 "knn": {
-                    "movie-vector": {
+                    vector_field: {
                         "vector": query_vector,
                         "k": k
                     }
@@ -98,10 +98,6 @@ class OpenSearchServerlessClient:
             index=self.index_name,
             body=search_body,
         )
-
-        print(f'\nTop {k} similar documents:')
-        for hit in response['hits']['hits']:
-            print(f"  Score: {hit['_score']}, Title: {hit['_source']['title']}, Year: {hit['_source']['year']}, Location: {hit['_source'].get('location-origin', 'N/A')}")
 
         return response
 
@@ -170,5 +166,10 @@ if __name__ == '__main__':
     # oss.create_index(index_body)
     # oss.index_documents('title','movie.json')
     oss.list_all_documents()
-    oss.retrieve_documents([3.3, 1.8, 4.2])
+    response = oss.retrieve_documents([3.3, 1.8, 4.2], 'movie-vector')
+
+    print(f'\nTop 3 similar documents:')
+    for hit in response['hits']['hits']:
+        print(f"  Score: {hit['_score']}, Title: {hit['_source']['title']}, Year: {hit['_source']['year']}, Location: {hit['_source'].get('location-origin', 'N/A')}")
+
     # oss.delete_index()
